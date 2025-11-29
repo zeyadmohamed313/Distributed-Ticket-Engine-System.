@@ -2,9 +2,6 @@ version: '3.8'
 
 services:
 
-  # ==========================================
-  # 1️⃣ المنطقة المشتركة
-  # ==========================================
 
   redis:
     image: redis:alpine
@@ -43,10 +40,6 @@ services:
     networks:
       - ticketing-net
 
-  # ==========================================
-  # 2️⃣ الشارد الأول (Shard 1)
-  # ==========================================
-
   shard1-primary:
     image: bitnami/postgresql:latest  # ✅ الحل المضمون
     container_name: db-shard1-primary
@@ -83,9 +76,6 @@ services:
     networks:
       - ticketing-net
 
-  # ==========================================
-  # 3️⃣ الشارد الثاني (Shard 2)
-  # ==========================================
 
   shard2-primary:
     image: bitnami/postgresql:latest  # ✅ الحل المضمون
@@ -123,9 +113,6 @@ services:
     networks:
       - ticketing-net
 
-  # ==========================================
-  # 4️⃣ موزع الأحمال
-  # ==========================================
   
   nginx:
     image: nginx:alpine
@@ -140,9 +127,6 @@ services:
     networks:
       - ticketing-net
 
-  # ==========================================
-  # 5️⃣ خدمة الإشعارات (Notification Service)
-  # ==========================================
   
   notification-service:
     build:
