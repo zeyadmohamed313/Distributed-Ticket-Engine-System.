@@ -1,0 +1,4 @@
+/home/zeyad/.gemini/antigravity/playground/synthetic-glenn/notification-service/src/main/java/com/flashsale/notification/NotificationServiceApplication.java
+/home/zeyad/.gemini/antigravity/playground/synthetic-glenn/notification-service/src/main/java/com/flashsale/notification/kafka/TicketEventConsumer.java
+/home/zeyad/.gemini/antigravity/playground/synthetic-glenn/notification-service/src/main/java/com/flashsale/notification/model/TicketBookingEvent.java
+/home/zeyad/.gemini/antigravity/playground/synthetic-glenn/notification-service/src/main/java/com/flashsale/notification/service/EmailService.java

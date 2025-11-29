@@ -1,0 +1,175 @@
+version: '3.8'
+
+services:
+
+  # ==========================================
+  # 1️⃣ المنطقة المشتركة
+  # ==========================================
+
+  redis:
+    image: redis:alpine
+    container_name: redis-lock
+    ports:
+      - "6379:6379"
+    networks:
+      - ticketing-net
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - ticketing-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9095:9095"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9095
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - ticketing-net
+
+  # ==========================================
+  # 2️⃣ الشارد الأول (Shard 1)
+  # ==========================================
+
+  shard1-primary:
+    image: bitnami/postgresql:latest  # ✅ الحل المضمون
+    container_name: db-shard1-primary
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=repl_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+      - POSTGRESQL_USERNAME=admin
+      - POSTGRESQL_PASSWORD=password123
+      - POSTGRESQL_DATABASE=ticket_db_shard1
+    volumes:
+      - shard1_primary_data:/bitnami/postgresql
+    networks:
+      - ticketing-net
+
+  shard1-replica:
+    image: bitnami/postgresql:latest  # ✅ الحل المضمون
+    container_name: db-shard1-replica
+    ports:
+      - "5434:5432"
+    depends_on:
+      - shard1-primary
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=repl_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+      - POSTGRESQL_MASTER_HOST=shard1-primary
+      - POSTGRESQL_MASTER_PORT_NUMBER=5432
+      - POSTGRESQL_PASSWORD=password123
+    volumes:
+      - shard1_replica_data:/bitnami/postgresql
+    networks:
+      - ticketing-net
+
+  # ==========================================
+  # 3️⃣ الشارد الثاني (Shard 2)
+  # ==========================================
+
+  shard2-primary:
+    image: bitnami/postgresql:latest  # ✅ الحل المضمون
+    container_name: db-shard2-primary
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=repl_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+      - POSTGRESQL_USERNAME=admin
+      - POSTGRESQL_PASSWORD=password123
+      - POSTGRESQL_DATABASE=ticket_db_shard2
+    volumes:
+      - shard2_primary_data:/bitnami/postgresql
+    networks:
+      - ticketing-net
+
+  shard2-replica:
+    image: bitnami/postgresql:latest  # ✅ الحل المضمون
+    container_name: db-shard2-replica
+    ports:
+      - "5436:5432"
+    depends_on:
+      - shard2-primary
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=repl_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+      - POSTGRESQL_MASTER_HOST=shard2-primary
+      - POSTGRESQL_MASTER_PORT_NUMBER=5432
+      - POSTGRESQL_PASSWORD=password123
+    volumes:
+      - shard2_replica_data:/bitnami/postgresql
+    networks:
+      - ticketing-net
+
+  # ==========================================
+  # 4️⃣ موزع الأحمال
+  # ==========================================
+  
+  nginx:
+    image: nginx:alpine
+    container_name: load-balancer
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - shard1-primary
+      - shard2-primary
+    networks:
+      - ticketing-net
+
+  # ==========================================
+  # 5️⃣ خدمة الإشعارات (Notification Service)
+  # ==========================================
+  
+  notification-service:
+    build:
+      context: ../notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - kafka
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=YOUR_EMAIL@gmail.com
+      - SPRING_MAIL_PASSWORD=YOUR_APP_PASSWORD
+      - NOTIFICATION_EMAIL_FROM=YOUR_EMAIL@gmail.com
+    networks:
+      - ticketing-net
+
+
+networks:
+  ticketing-net:
+    driver: bridge
+
+volumes:
+  shard1_primary_data:
+  shard1_replica_data:
+  shard2_primary_data:
+  shard2_replica_data:

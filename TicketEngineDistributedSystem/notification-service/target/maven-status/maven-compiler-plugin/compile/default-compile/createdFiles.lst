@@ -1,0 +1,5 @@
+com/flashsale/notification/service/EmailService.class
+com/flashsale/notification/model/TicketBookingEvent.class
+com/flashsale/notification/NotificationServiceApplication.class
+com/flashsale/notification/model/TicketBookingEvent$TicketBookingEventBuilder.class
+com/flashsale/notification/kafka/TicketEventConsumer.class
