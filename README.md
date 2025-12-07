@@ -145,10 +145,4 @@ Replication (On Read): >>> 📖 Reading from: SHARD_2_REPLICA
 │   ├── service/            # Redis Locking & Transaction Management
 │   └── controller/         # REST Endpoints
 └── notification-service/   # Email Logic (Consumer)
-    └── kafka/              # Kafka Listeners
-
-
-🤝 Contributing
-
-Feel free to fork this repository and submit pull requests to add features like Circuit Breakers (Resilience4j) or Distributed Tracing (Zipkin).
-
+    └── kafka/              # Kafka 
