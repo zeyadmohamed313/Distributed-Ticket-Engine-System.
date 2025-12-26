@@ -36,7 +36,6 @@
 ## 📁 Project Structure
 
 ```
-synthetic-glenn/
 ├── ticket-service/          # خدمة التذاكر الرئيسية
 │   ├── src/
 │   │   └── main/
