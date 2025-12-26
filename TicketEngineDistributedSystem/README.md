@@ -33,42 +33,7 @@
 - تأكيد الحجز تلقائياً
 - SMTP integration
 
-## 📁 Project Structure
 
-```
-├── ticket-service/          # خدمة التذاكر الرئيسية
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/
-│   │       │   └── com/flashsale/ticketing/
-│   │       │       ├── controller/    # REST Controllers
-│   │       │       ├── service/       # Business Logic
-│   │       │       ├── repository/    # Data Access
-│   │       │       ├── model/         # Entities
-│   │       │       └── config/        # Configuration
-│   │       └── resources/
-│   │           └── application.properties
-│   └── pom.xml
-│
-├── notification-service/    # خدمة الإشعارات
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/
-│   │       │   └── com/flashsale/notification/
-│   │       │       ├── kafka/         # Kafka Consumers
-│   │       │       ├── service/       # Email Service
-│   │       │       └── model/         # Event Models
-│   │       └── resources/
-│   │           └── application.properties
-│   ├── Dockerfile
-│   ├── README.md
-│   └── pom.xml
-│
-└── infra/                   # Infrastructure
-    ├── docker-compose.yml   # All services
-    ├── nginx.conf           # Load balancer config
-    └── loadtesting.js       # Performance tests
-```
 
 ## 🛠️ Tech Stack
 
